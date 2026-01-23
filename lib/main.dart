@@ -1,4 +1,5 @@
 import 'package:app/presentation/pages/auth/login_page.dart';
+import 'package:app/presentation/pages/receipts/receipts_gallery_page.dart';
 import 'package:flutter/material.dart';
 
 import 'config/themes/app_theme.dart';
@@ -23,7 +24,9 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light,      // ✅ your light theme
       darkTheme: AppTheme.dark,   // optional
       themeMode: ThemeMode.light, // or system
-      home: const LoginScreen(),  // ✅ your login screen
+      // home: const LoginScreen(),
+      //✅ your login screen
+      home: ReceiptsGalleryPage(),
     );
   }
 }
