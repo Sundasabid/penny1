@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import '../../../config/themes/app_colors.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool _obscurePassword = true; // controls password visibility
 
   @override
   Widget build(BuildContext context) {
@@ -56,27 +63,26 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // Phone Number
-              _label("Phone Number", context),
-              _inputField(
-                hint: "Enter phone number",
-                icon: Icons.phone_outlined,
-                context: context,
-              ),
+
 
               const SizedBox(height: 20),
 
               // Password
+
+              _label("Phone Number", context),
+              _inputField(
+                hint: "Enter phone number",
+                icon: Icons.phone_outlined,
+              ),
+
+              const SizedBox(height: 20),
+
               _label("Password", context),
               _inputField(
                 hint: "••••",
                 icon: Icons.lock_outline,
-                suffix: Icons.visibility_outlined,
-                obscure: true,
-                context: context,
+                isPassword: true,
               ),
-
-              const SizedBox(height: 8),
 
               // Forgot Password
               Align(
@@ -206,22 +212,59 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  static Widget _inputField({
+  Widget _inputField({
     required String hint,
     required IconData icon,
-    IconData? suffix,
-    bool obscure = false,
-    required BuildContext context,
+    bool isPassword = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return TextField(
-      obscureText: obscure,
+      obscureText: isPassword ? _obscurePassword : false,
+      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: hint,
-        prefixIcon: Icon(icon),
-        suffixIcon: suffix != null ? Icon(suffix) : null,
-        // styling comes from theme's InputDecorationTheme
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurface.withOpacity(0.5),
+        ),
+        filled: true,
+        fillColor: colorScheme.surface, // matches your theme's surface color
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+        ),
+        prefixIcon: Icon(icon, color: colorScheme.onSurface),
+        suffixIcon: isPassword
+            ? IconButton(
+          icon: Icon(
+            _obscurePassword
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: colorScheme.onSurface,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
+        )
+            : null,
       ),
     );
   }
+
+
+
+
 }
 
