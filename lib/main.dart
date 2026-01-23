@@ -1,6 +1,5 @@
-// lib/main.dart
-import 'package:app/presentation/bloc/transaction_bloc.dart';
-import 'package:app/presentation/pages/add_expense.dart';
+import 'package:app/presentation/pages/auth/login_page.dart';
+import 'package:app/presentation/pages/receipts/receipts_gallery_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,28 +22,15 @@ class PennyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ---------- Manual dependency wiring (no injector) ----------
-    final local = InMemoryLocalDataSource();
-    final remote = FirestoreSource();
-
-    final repo = TransactionRepositoryImpl(local: local, remote: remote);
-
-    final addTx = AddTransactionUseCase(repo);
-    final getTx = GetTransactionsUseCase(repo);
-
-    return BlocProvider<TransactionBloc>(
-      create: (_) => TransactionBloc(
-        addTransaction: addTx,
-        getTransactions: getTx,
-      ),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'PENNY',
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.light, // change to ThemeMode.system later
-        home: const AddExpensePage(),
-      ),
+    return MaterialApp(
+      title: 'Penny',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,      // ✅ your light theme
+      darkTheme: AppTheme.dark,   // optional
+      themeMode: ThemeMode.light, // or system
+      // home: const LoginScreen(),
+      //✅ your login screen
+      home: ReceiptsGalleryPage(),
     );
   }
 }
