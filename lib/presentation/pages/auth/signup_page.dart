@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import '../../../config/themes/app_colors.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  bool _obscurePassword = true; // controls password visibility
+class _SignupScreenState extends State<SignupScreen> {
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -18,17 +18,16 @@ class _LoginScreenState extends State<LoginScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background, // from theme
+      backgroundColor: colorScheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-
               const SizedBox(height: 60),
 
-              // 🔰 Top Icon (Finance related)
+              // 🔰 Top Icon
               Container(
                 width: 56,
                 height: 56,
@@ -37,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
-                  Icons.account_balance_wallet_outlined,
+                  Icons.person_add_alt_1_outlined,
                   color: colorScheme.onPrimary,
                   size: 30,
                 ),
@@ -47,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Title
               Text(
-                "Welcome Back",
+                "Create Account",
                 style: textTheme.headlineLarge,
               ),
 
@@ -55,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Subtitle
               Text(
-                "Log in to manage your finances securely",
+                "Sign up to start managing your finances",
                 style: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurface.withOpacity(0.7),
                 ),
@@ -63,12 +62,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 40),
 
-
+              // Full Name
+              _label("Full Name", context),
+              _inputField(
+                hint: "Enter your full name",
+                icon: Icons.person_outline,
+              ),
 
               const SizedBox(height: 20),
 
-              // Password
-
+              // Phone Number
               _label("Phone Number", context),
               _inputField(
                 hint: "Enter phone number",
@@ -77,34 +80,35 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
+              // Password
               _label("Password", context),
               _inputField(
                 hint: "••••",
                 icon: Icons.lock_outline,
                 isPassword: true,
+                isConfirmPassword: false,
               ),
 
-              // Forgot Password
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  "Forgot Password?",
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.secondary, // theme color
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+              const SizedBox(height: 20),
+
+              // Confirm Password
+              _label("Confirm Password", context),
+              _inputField(
+                hint: "••••",
+                icon: Icons.lock_outline,
+                isPassword: true,
+                isConfirmPassword: true,
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
-              // Continue Button
+              // Sign Up Button
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {},
-                  child: const Text("Continue"),
+                  child: const Text("Create Account"),
                 ),
               ),
 
@@ -117,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
-                      "Or continue\nwith",
+                      "Or sign up\nwith",
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurface.withOpacity(0.5),
@@ -130,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 24),
 
-              // Google Button (uses OutlinedButton theme)
+              // Google Button
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -165,18 +169,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 28),
 
-              // Sign Up
+              // Login Redirect
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ",
+                    "Already have an account? ",
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
                   Text(
-                    "Sign Up",
+                    "Log In",
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.w600,
@@ -193,6 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Label (same as Login)
   static Widget _label(String text, BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
@@ -212,16 +217,22 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Input Field (same structure as Login)
   Widget _inputField({
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    bool isConfirmPassword = false,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final bool obscure = isPassword
+        ? (isConfirmPassword ? _obscureConfirmPassword : _obscurePassword)
+        : false;
+
     return TextField(
-      obscureText: isPassword ? _obscurePassword : false,
+      obscureText: obscure,
       style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: hint,
@@ -229,8 +240,9 @@ class _LoginScreenState extends State<LoginScreen> {
           color: colorScheme.onSurface.withOpacity(0.5),
         ),
         filled: true,
-        fillColor: colorScheme.surface, // matches your theme's surface color
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        fillColor: colorScheme.surface,
+        contentPadding:
+        const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.outline),
@@ -247,14 +259,18 @@ class _LoginScreenState extends State<LoginScreen> {
         suffixIcon: isPassword
             ? IconButton(
           icon: Icon(
-            _obscurePassword
+            obscure
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: colorScheme.onSurface,
           ),
           onPressed: () {
             setState(() {
-              _obscurePassword = !_obscurePassword;
+              if (isConfirmPassword) {
+                _obscureConfirmPassword = !_obscureConfirmPassword;
+              } else {
+                _obscurePassword = !_obscurePassword;
+              }
             });
           },
         )
@@ -262,9 +278,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-
-
-
 }
-
