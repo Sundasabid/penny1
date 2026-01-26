@@ -1,17 +1,17 @@
 class ReceiptEntity {
   final String id;
-  final String merchant;
-  final double amount;
-  final DateTime date;
   final String imagePath;
-  final String rawText;
+  final String merchantName;
+  final num amount;
+  final String category;
+  final DateTime dateTime;
 
   const ReceiptEntity({
     required this.id,
-    required this.merchant,
-    required this.amount,
-    required this.date,
     required this.imagePath,
-    required this.rawText,
+    required this.merchantName,
+    required this.amount,
+    required this.category,
+    required this.dateTime,
   });
 }

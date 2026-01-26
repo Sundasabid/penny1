@@ -1,17 +1,21 @@
-// lib/presentation/blocs/receipt/receipt_event.dart
-part of 'receipt_bloc.dart';
+abstract class ReceiptEvent {}
 
-abstract class ReceiptEvent extends Equatable {
-  const ReceiptEvent();
+class GetReceiptsRequested extends ReceiptEvent {}
 
-  @override
-  List<Object?> get props => [];
-}
+class SaveReceiptRequested extends ReceiptEvent {
+  final String receiptId;
+  final String imagePath;
+  final String merchantName;
+  final num amount;
+  final String category;
+  final DateTime dateTime;
 
-class ReceiptsLoadRequested extends ReceiptEvent {
-  const ReceiptsLoadRequested();
-}
-
-class ReceiptScanRequested extends ReceiptEvent {
-  const ReceiptScanRequested();
+  SaveReceiptRequested({
+    required this.receiptId,
+    required this.imagePath,
+    required this.merchantName,
+    required this.amount,
+    required this.category,
+    required this.dateTime,
+  });
 }

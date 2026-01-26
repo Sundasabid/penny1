@@ -1,36 +1,15 @@
-// lib/presentation/blocs/receipt/receipt_state.dart
-part of 'receipt_bloc.dart';
+abstract class ReceiptState {}
 
-enum ReceiptStatus { initial, scanning, loaded, error }
+class ReceiptInitial extends ReceiptState {}
 
-class ReceiptState extends Equatable {
-  final ReceiptStatus status;
-  final List<ReceiptEntity> receipts;
-  final String? errorMessage;
+class ReceiptLoading extends ReceiptState {}
 
-  const ReceiptState({
-    required this.status,
-    required this.receipts,
-    this.errorMessage,
-  });
+class ReceiptFailure extends ReceiptState {
+  final String message;
+  ReceiptFailure(this.message);
+}
 
-  const ReceiptState.initial()
-      : status = ReceiptStatus.initial,
-        receipts = const [],
-        errorMessage = null;
-
-  ReceiptState copyWith({
-    ReceiptStatus? status,
-    List<ReceiptEntity>? receipts,
-    String? errorMessage,
-  }) {
-    return ReceiptState(
-      status: status ?? this.status,
-      receipts: receipts ?? this.receipts,
-      errorMessage: errorMessage,
-    );
-  }
-
-  @override
-  List<Object?> get props => [status, receipts, errorMessage];
+class ReceiptsLoaded extends ReceiptState {
+  final List<dynamic> receipts;
+  ReceiptsLoaded(this.receipts);
 }
