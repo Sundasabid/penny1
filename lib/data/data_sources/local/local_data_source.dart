@@ -1,6 +1,6 @@
 
 
-import '../../models/transaction.dart';
+import '../../models/receipt/transaction_model.dart';
 
 abstract class LocalDataSource {
   Future<void> addTransaction(TransactionModel tx);

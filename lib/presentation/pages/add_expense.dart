@@ -68,6 +68,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
       dateTime: _selectedDate,
       paymentMethod: _paymentMethod,
       isIncome: false,
+      source: TransactionSource.manual,
+      receiptId: null
     );
 
     context.read<TransactionBloc>().add(AddTransactionRequested(tx));

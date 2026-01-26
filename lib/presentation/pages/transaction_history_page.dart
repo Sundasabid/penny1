@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 import '../../../domain/entities/transaction.dart';
 import '../../config/themes/app_colors.dart';
 import '../../core/widgets/history_filter_bar.dart';
@@ -13,7 +12,6 @@ import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
 import 'add_expense.dart';
-
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -27,6 +25,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
   DateTimeRange? _range;
   String? _category;
+
+  // ✅ Receipt filter (null = All)
+  TransactionSource? _source;
 
   @override
   void initState() {
@@ -56,7 +57,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
       final matchCategory = _category == null || tx.category == _category;
 
-      return matchSearch && matchRange && matchCategory;
+      // ✅ NEW: source filter for Receipt
+      final matchSource = _source == null || tx.source == _source;
+
+      return matchSearch && matchRange && matchCategory && matchSource;
     }).toList();
 
     filtered.sort((a, b) => b.dateTime.compareTo(a.dateTime));
@@ -72,7 +76,6 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
       body: SafeArea(
         child: BlocBuilder<TransactionBloc, TransactionState>(
           builder: (context, state) {
-            // ✅ FIXED: use state.transactions (not state.items)
             final filtered = _applyFilters(state.transactions);
 
             return ListView(
@@ -84,14 +87,12 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     _CircleIcon(
                       icon: Icons.arrow_back,
                       onTap: () {
-                        // ✅ If you used pushReplacement to open History,
-                        // maybePop/pop will not work. Replace back to AddExpensePage.
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (_) => const AddExpensePage()),
                         );
                       },
                     ),
-                    SizedBox(width: 12), // ✅ removed const to avoid const-context issues
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Transaction\nHistory',
@@ -100,7 +101,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                         ),
                       ),
                     ),
-                    SizedBox(width: 12), // ✅ removed const to avoid const-context issues
+                    const SizedBox(width: 12),
                     InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: () {
@@ -128,19 +129,22 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     ),
                   ],
                 ),
-
-
-
-
                 const SizedBox(height: 14),
 
                 SearchBarWidget(controller: _searchCtrl),
-
                 const SizedBox(height: 14),
 
+                // ✅ IMPORTANT:
+                // This requires your history_filter_bar.dart to have:
+                // selectedSource + onSelectSource parameters.
                 HistoryFilterBar(
                   selectedRange: _range,
                   selectedCategory: _category,
+
+                  // ✅ NEW parameters
+                  selectedSource: _source,
+                  onSelectSource: (src) => setState(() => _source = src),
+
                   onPickRange: () async {
                     final now = DateTime.now();
                     final picked = await showDateRangePicker(
@@ -150,7 +154,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                       builder: (context, child) {
                         return Theme(
                           data: Theme.of(context).copyWith(
-                            colorScheme: Theme.of(context).colorScheme.copyWith(primary: AppColors.neon),
+                            colorScheme: Theme.of(context)
+                                .colorScheme
+                                .copyWith(primary: AppColors.neon),
                           ),
                           child: child!,
                         );
@@ -193,6 +199,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     setState(() {
                       _range = null;
                       _category = null;
+                      _source = null; // ✅ clear receipt filter too
                       _searchCtrl.clear();
                     });
                   },

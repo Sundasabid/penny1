@@ -1,4 +1,4 @@
-import '../../../domain/entities/transaction.dart';
+import '../../../../domain/entities/transaction.dart';
 
 /// Data-layer representation of a transaction
 /// Used for local / remote storage (Hive, Firestore, etc.)
@@ -44,6 +44,8 @@ class TransactionModel {
       dateTime: dateTime,
       paymentMethod: paymentMethod,
       isIncome: isIncome,
+      source: TransactionSource.manual,
+      receiptId: null
     );
   }
 

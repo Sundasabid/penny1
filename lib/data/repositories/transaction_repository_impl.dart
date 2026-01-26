@@ -2,7 +2,7 @@ import '../../domain/entities/transaction.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../data_sources/local/local_data_source.dart';
 import '../data_sources/remote/firestore_source.dart';
-import '../models/transaction.dart';
+import '../models/receipt/transaction_model.dart';
 
 
 class TransactionRepositoryImpl implements TransactionRepository {

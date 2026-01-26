@@ -1,8 +1,10 @@
+// lib/src/presentation/pages/bloc/transaction_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 import '../../domain/usecases/ transaction/add_transaction.dart';
 import '../../domain/usecases/ transaction/get_transactions.dart';
+import '../../domain/usecases/transaction/add_transaction.dart';
+import '../../domain/usecases/transaction/get_transactions.dart';
 import 'transaction_event.dart';
 import 'transaction_state.dart';
 
@@ -22,7 +24,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       LoadTransactionsRequested event,
       Emitter<TransactionState> emit,
       ) async {
-    emit(state.copyWith(isLoading: true, errorMessage: null));
+    emit(state.copyWith(isLoading: true, errorMessage: null, addSuccess: false));
 
     try {
       final items = await getTransactions();
@@ -64,6 +66,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         state.copyWith(
           isLoading: false,
           errorMessage: e.toString(),
+          addSuccess: false,
         ),
       );
     }
