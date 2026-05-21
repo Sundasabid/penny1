@@ -36,7 +36,9 @@ class HistoryFilterBar extends StatelessWidget {
 
     // All is selected when nothing is filtered
     final allSelected =
-        selectedRange == null && selectedCategory == null && selectedSource == null;
+        selectedRange == null &&
+        selectedCategory == null &&
+        selectedSource == null;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -105,9 +107,18 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? AppColors.neon : Colors.white;
-    final fg = selected ? Colors.white : const Color(0xFF98A2B3);
-    final borderColor = outlined ? theme.dividerColor.withValues(alpha: 0.85) : Colors.transparent;
+    final isDark = theme.brightness == Brightness.dark;
+    final bg = selected
+        ? AppColors.neon
+        : (isDark ? const Color(0xFF131A21) : Colors.white);
+    final fg = selected
+        ? Colors.white
+        : (isDark ? AppColors.textOnDarkMuted : const Color(0xFF98A2B3));
+    final borderColor = outlined
+        ? (isDark
+              ? const Color(0xFF1E272E)
+              : theme.dividerColor.withValues(alpha: 0.85))
+        : Colors.transparent;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),

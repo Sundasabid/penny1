@@ -13,10 +13,7 @@ class ReceiptImageViewer extends StatelessWidget {
     return Scaffold(
       backgroundColor: colorScheme.background,
       appBar: AppBar(
-        title: Text(
-          'Receipt Image',
-          style: textTheme.titleMedium,
-        ),
+        title: Text('Receipt Image', style: textTheme.titleMedium),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,

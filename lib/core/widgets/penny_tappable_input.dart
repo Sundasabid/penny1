@@ -14,7 +14,11 @@ class PennyTappableInput extends StatelessWidget {
     this.trailingIcon = Icons.keyboard_arrow_down_rounded,
   });
 
-  InputDecoration _decorationFromTheme(BuildContext context, {Widget? prefixIcon, Widget? suffixIcon}) {
+  InputDecoration _decorationFromTheme(
+    BuildContext context, {
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+  }) {
     final t = Theme.of(context).inputDecorationTheme;
     return InputDecoration(
       prefixIcon: prefixIcon,

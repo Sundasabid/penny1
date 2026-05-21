@@ -24,3 +24,13 @@ class AddTransactionRequested extends TransactionEvent {
   @override
   List<Object?> get props => [transaction];
 }
+
+/// Fired when user deletes a transaction
+class DeleteTransactionRequested extends TransactionEvent {
+  final TransactionEntity transaction;
+
+  const DeleteTransactionRequested(this.transaction);
+
+  @override
+  List<Object?> get props => [transaction];
+}

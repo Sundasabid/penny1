@@ -1,5 +1,3 @@
-
-
 import '../../models/receipt/transaction_model.dart';
 
 class FirestoreSource {

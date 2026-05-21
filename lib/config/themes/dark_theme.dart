@@ -35,8 +35,6 @@ ThemeData buildDarkTheme() {
       surfaceTintColor: Colors.transparent,
     ),
 
-
-
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.darkSurface2,

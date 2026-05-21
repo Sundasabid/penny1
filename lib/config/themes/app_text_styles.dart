@@ -16,7 +16,9 @@ class AppTextStyles {
 
   static TextTheme textTheme({required bool isDark}) {
     final onBg = isDark ? AppColors.textOnDark : AppColors.textOnLight;
-    final muted = isDark ? AppColors.textOnDarkMuted : AppColors.textOnLightMuted;
+    final muted = isDark
+        ? AppColors.textOnDarkMuted
+        : AppColors.textOnLightMuted;
 
     return TextTheme(
       // Headlines

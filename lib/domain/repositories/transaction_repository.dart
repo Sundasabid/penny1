@@ -13,4 +13,7 @@ abstract class TransactionRepository {
   /// Fetch all transactions
   /// Used by History & Analytics
   Future<List<TransactionEntity>> getTransactions();
+
+  /// Delete a transaction by ID
+  Future<void> deleteTransaction(String id);
 }

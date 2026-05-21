@@ -35,7 +35,6 @@ ThemeData buildLightTheme() {
       surfaceTintColor: Colors.transparent,
     ),
 
-
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.lightSurface2,

@@ -42,10 +42,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               const SizedBox(height: 24),
 
               // Title
-              Text(
-                "Forgot Password",
-                style: textTheme.headlineLarge,
-              ),
+              Text("Forgot Password", style: textTheme.headlineLarge),
 
               const SizedBox(height: 8),
 
@@ -130,10 +127,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   // Input Field (same as Login/Signup)
-  Widget _inputField({
-    required String hint,
-    required IconData icon,
-  }) {
+  Widget _inputField({required String hint, required IconData icon}) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -146,8 +140,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         filled: true,
         fillColor: colorScheme.surface,
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.outline),

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,10 +9,8 @@ import '../../bloc/receipt/receipt_bloc.dart';
 import '../../bloc/receipt/receipt_event.dart';
 import '../../bloc/receipt/receipt_state.dart';
 
-import '../../bloc/transaction_bloc.dart';
-import '../../bloc/transaction_event.dart';
-
-import '../../../domain/entities/transaction.dart';
+import '../../../config/themes/app_colors.dart';
+import '../../../core/utils/receipt_process_helper.dart';
 
 import 'scan_receipt_page.dart';
 import 'receipt_detail_page.dart';
@@ -34,78 +33,46 @@ class _ReceiptsGalleryPageState extends State<ReceiptsGalleryPage> {
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (_) => const ScanReceiptPage()),
     );
-    if (!mounted || result == null) return;
-
-    final receiptId = DateTime.now().millisecondsSinceEpoch.toString();
-    final imagePath = result['imagePath'] as String;
-    final merchantName = (result['merchantName'] as String?)?.trim().isNotEmpty == true
-        ? (result['merchantName'] as String)
-        : 'Unknown Merchant';
-    final amount = (result['amount'] as num?)?.toDouble() ?? 0.0;
-    final category = (result['category'] as String?)?.trim().isNotEmpty == true
-        ? (result['category'] as String)
-        : 'other';
-    final dateTime = (result['dateTime'] as DateTime?) ?? DateTime.now();
-
-    // Save receipt (gallery)
-    context.read<ReceiptBloc>().add(
-      SaveReceiptRequested(
-        receiptId: receiptId,
-        imagePath: imagePath,
-        merchantName: merchantName,
-        amount: amount,
-        category: category,
-        dateTime: dateTime,
-      ),
-    );
-
-    // Save transaction (history) — manual code untouched
-    context.read<TransactionBloc>().add(
-      AddTransactionRequested(
-        TransactionEntity(
-          id: 'tx_$receiptId',
-          merchant: merchantName,
-          category: category,
-          amount: amount,
-          dateTime: dateTime,
-          paymentMethod: 'Cash',
-          isIncome: false,
-          source: TransactionSource.receipt,
-          receiptId: receiptId,
-        ),
-      ),
-    );
-
-    // Refresh
-    context.read<ReceiptBloc>().add(GetReceiptsRequested());
+    if (result != null && mounted) {
+      ReceiptProcessHelper.processScanResult(context, result);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F8FB),
-        surfaceTintColor: const Color(0xFFF7F8FB),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF0B1220)),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: isDark ? Colors.white : const Color(0xFF0B1220),
+          ),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text(
+        title: Text(
           'Receipts',
-          style: TextStyle(
-            color: Color(0xFF0B1220),
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w900,
-            letterSpacing: -0.3,
+            color: isDark ? Colors.white : const Color(0xFF0B1220),
           ),
         ),
         actions: [
           IconButton(
             tooltip: 'Refresh',
-            onPressed: () => context.read<ReceiptBloc>().add(GetReceiptsRequested()),
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF0B1220)),
+            onPressed: () =>
+                context.read<ReceiptBloc>().add(GetReceiptsRequested()),
+            icon: Icon(
+              Icons.refresh_rounded,
+              color: isDark ? Colors.white : const Color(0xFF0B1220),
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -121,7 +88,8 @@ class _ReceiptsGalleryPageState extends State<ReceiptsGalleryPage> {
             if (state is ReceiptFailure) {
               return _ErrorState(
                 message: state.message,
-                onRetry: () => context.read<ReceiptBloc>().add(GetReceiptsRequested()),
+                onRetry: () =>
+                    context.read<ReceiptBloc>().add(GetReceiptsRequested()),
               );
             }
 
@@ -139,26 +107,31 @@ class _ReceiptsGalleryPageState extends State<ReceiptsGalleryPage> {
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                       child: _HeaderStats(
                         count: receipts.length,
-                        total: receipts.fold<double>(0, (sum, r) => sum + (r.amount as num).toDouble()),
+                        total: receipts.fold<double>(
+                          0,
+                          (sum, r) => sum + (r.amount as num).toDouble(),
+                        ),
                       ),
                     ),
                   ),
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
                     sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
-                        childAspectRatio: 0.78,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                             crossAxisCount: 2,
+                             crossAxisSpacing: 16,
+                             mainAxisSpacing: 16,
+                             childAspectRatio: 0.78,
+                           ),
                       delegate: SliverChildBuilderDelegate(
-                            (context, i) => _ReceiptCard(
+                        (context, i) => _ReceiptCard(
                           receipt: receipts[i],
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => ReceiptDetailPage(receipt: receipts[i]),
+                                builder: (_) =>
+                                    ReceiptDetailPage(receipt: receipts[i]),
                               ),
                             );
                           },
@@ -179,39 +152,40 @@ class _ReceiptsGalleryPageState extends State<ReceiptsGalleryPage> {
   }
 }
 
-/// ---------- UI BUILDING BLOCKS ----------
-
 class _ReceiptCard extends StatelessWidget {
-  final dynamic receipt; // ReceiptEntity type in your project
+  final dynamic receipt;
   final VoidCallback onTap;
 
-  const _ReceiptCard({
-    required this.receipt,
-    required this.onTap,
-  });
+  const _ReceiptCard({required this.receipt, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final merchant = (receipt.merchantName as String?) ?? 'Unknown';
     final category = (receipt.category as String?) ?? 'other';
     final amount = (receipt.amount as num?)?.toDouble() ?? 0.0;
     final dt = receipt.dateTime as DateTime;
 
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      elevation: 0,
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF131A21) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E272E) : const Color(0xFFE2E8F0),
+        ),
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
             ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(18),
-                topRight: Radius.circular(18),
+                topLeft: Radius.circular(21),
+                topRight: Radius.circular(21),
               ),
               child: AspectRatio(
                 aspectRatio: 4 / 3,
@@ -222,28 +196,28 @@ class _ReceiptCard extends StatelessWidget {
                       File(receipt.imagePath as String),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: const Color(0xFFF1F5F9),
-                        child: const Center(
-                          child: Icon(Icons.receipt_long, size: 42, color: Color(0xFF94A3B8)),
+                        color: isDark
+                            ? const Color(0xFF1C252E)
+                            : const Color(0xFFF1F5F9),
+                        child: Icon(
+                          Icons.receipt_long_rounded,
+                          size: 42,
+                          color: isDark ? Colors.white24 : Colors.black12,
                         ),
                       ),
                     ),
-
-                    // subtle overlay for legibility
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withOpacity(0.04),
-                            Colors.black.withOpacity(0.30),
+                            Colors.black.withOpacity(0.0),
+                            Colors.black.withOpacity(0.4),
                           ],
                         ),
                       ),
                     ),
-
-                    // Category chip
                     Positioned(
                       left: 10,
                       top: 10,
@@ -253,11 +227,9 @@ class _ReceiptCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Content
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -265,43 +237,31 @@ class _ReceiptCard extends StatelessWidget {
                       merchant,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
+                      style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w900,
-                        color: Color(0xFF0B1220),
-                        letterSpacing: -0.2,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       DateFormat('MMM d • h:mm a').format(dt),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF64748B),
-                        fontWeight: FontWeight.w700,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isDark
+                            ? AppColors.textOnDarkMuted
+                            : AppColors.textOnLightMuted,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const Spacer(),
-                    Row(
-                      children: [
-                        const Icon(Icons.payments_rounded, size: 16, color: Color(0xFF0E9F6E)),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            'PKR ${_fmtMoney(amount)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF0E9F6E),
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'PKR ${_fmtMoney(amount)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.neon,
+                        letterSpacing: -0.2,
+                      ),
                     ),
                   ],
                 ),
@@ -318,48 +278,31 @@ class _CategoryChip extends StatelessWidget {
   final String category;
   const _CategoryChip({required this.category});
 
-  IconData _iconFor(String c) {
-    switch (c.toLowerCase()) {
-      case 'grocery':
-        return Icons.local_grocery_store_rounded;
-      case 'transport':
-        return Icons.local_gas_station_rounded;
-      case 'dining':
-        return Icons.restaurant_rounded;
-      case 'bills':
-        return Icons.receipt_rounded;
-      case 'health':
-        return Icons.medical_services_rounded;
-      case 'shopping':
-        return Icons.shopping_bag_rounded;
-      default:
-        return Icons.category_rounded;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(_iconFor(category), size: 16, color: const Color(0xFF0B1220)),
-          const SizedBox(width: 6),
-          Text(
-            category,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF131A21).withOpacity(0.8)
+                : Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            category.toUpperCase(),
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF0B1220),
+              color: AppColors.neon,
+              letterSpacing: 0.5,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -386,9 +329,10 @@ class _HeaderStats extends StatelessWidget {
         Expanded(
           child: _StatCard(
             title: 'Total Spend',
-            value: 'PKR ${_fmtMoney(total)}',
+            value: 'PKR',
+            subtitle: _fmtMoney(total),
             icon: Icons.payments_rounded,
-            accent: const Color(0xFF0E9F6E),
+            highlight: true,
           ),
         ),
       ],
@@ -399,67 +343,80 @@ class _HeaderStats extends StatelessWidget {
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
+  final String? subtitle;
   final IconData icon;
-  final Color? accent;
+  final bool highlight;
 
   const _StatCard({
     required this.title,
     required this.value,
+    this.subtitle,
     required this.icon,
-    this.accent,
+    this.highlight = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final a = accent ?? const Color(0xFF111827);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: isDark ? const Color(0xFF131A21) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E272E) : const Color(0xFFE2E8F0),
+        ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 38,
-            height: 38,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: a.withOpacity(0.10),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.neon.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: a),
+            child: Icon(icon, color: AppColors.neon, size: 20),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                    fontWeight: FontWeight.w800,
-                  ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark
+                  ? AppColors.textOnDarkMuted
+                  : AppColors.textOnLightMuted,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: highlight
+                      ? AppColors.neon
+                      : (isDark ? Colors.white : const Color(0xFF0B1220)),
                 ),
-                const SizedBox(height: 4),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(width: 4),
                 Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF0B1220),
+                  subtitle!,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
-                    letterSpacing: -0.2,
+                    color: highlight
+                        ? AppColors.neon
+                        : (isDark ? Colors.white : const Color(0xFF0B1220)),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
         ],
       ),
@@ -473,51 +430,55 @@ class _EmptyGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(30),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 74,
-              height: 74,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFF0E9F6E).withOpacity(0.12),
-                borderRadius: BorderRadius.circular(22),
+                color: AppColors.neon.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.receipt_long_rounded, size: 42, color: Color(0xFF0E9F6E)),
+              child: const Icon(
+                Icons.receipt_long_rounded,
+                size: 40,
+                color: AppColors.neon,
+              ),
             ),
-            const SizedBox(height: 14),
-            const Text(
-              'No receipts yet',
-              style: TextStyle(
-                fontSize: 18,
+            const SizedBox(height: 20),
+            Text(
+              'Snap your receipts',
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF0B1220),
-                letterSpacing: -0.2,
               ),
             ),
-            const SizedBox(height: 6),
-            const Text(
-              'Scan your first receipt and PENNY will\nextract merchant, amount, and category.',
+            const SizedBox(height: 8),
+            Text(
+              'No receipts found. Track your spending\nby scanning your physical receipts.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF64748B),
-                fontWeight: FontWeight.w700,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isDark
+                    ? AppColors.textOnDarkMuted
+                    : AppColors.textOnLightMuted,
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onScan,
-              icon: const Icon(Icons.document_scanner_rounded),
-              label: const Text('Scan Receipt'),
+              icon: const Icon(Icons.add_a_photo_rounded),
+              label: const Text('Scan Now'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0E9F6E),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
               ),
             ),
           ],
@@ -536,36 +497,19 @@ class _ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline_rounded, size: 46, color: Color(0xFFEF4444)),
-            const SizedBox(height: 10),
-            const Text(
-              'Something went wrong',
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 14),
-            ElevatedButton(
-              onPressed: onRetry,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0E9F6E),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            color: AppColors.danger,
+            size: 48,
+          ),
+          const SizedBox(height: 16),
+          Text(message, textAlign: TextAlign.center),
+          const SizedBox(height: 16),
+          TextButton(onPressed: onRetry, child: const Text('Retry')),
+        ],
       ),
     );
   }
@@ -577,19 +521,20 @@ class _LoadingGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+      padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
         childAspectRatio: 0.78,
       ),
       itemCount: 6,
       itemBuilder: (_, __) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF131A21)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(22),
         ),
       ),
     );
@@ -603,16 +548,16 @@ class _PennyFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
-      backgroundColor: const Color(0xFF0E9F6E),
+      heroTag: 'receipt_gallery_fab',
+      backgroundColor: AppColors.neon,
       foregroundColor: Colors.white,
-      elevation: 2,
       onPressed: onTap,
-      icon: const Icon(Icons.add_rounded),
       label: const Text(
-        'Scan',
+        'Scan Receipt',
         style: TextStyle(fontWeight: FontWeight.w900),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      icon: const Icon(Icons.document_scanner_rounded),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     );
   }
 }

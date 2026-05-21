@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/themes/app_colors.dart';
 
-
 class PennyOutlineButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -35,13 +34,12 @@ class PennyOutlineButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (leading != null) ...[
-              leading!,
-              const SizedBox(width: 10),
-            ],
+            if (leading != null) ...[leading!, const SizedBox(width: 10)],
             Text(
               text,
-              style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ],
         ),

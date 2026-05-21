@@ -45,7 +45,7 @@ class TransactionModel {
       paymentMethod: paymentMethod,
       isIncome: isIncome,
       source: TransactionSource.manual,
-      receiptId: null
+      receiptId: null,
     );
   }
 

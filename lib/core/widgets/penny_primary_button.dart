@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/themes/app_colors.dart';
 
-
 class PennyPrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -34,30 +33,33 @@ class PennyPrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             boxShadow: glow
                 ? (isDark
-                ? AppColors.neonGlow(blur: 22, opacity: 0.35)
-                : [
-              BoxShadow(
-                color: AppColors.neon.withValues(alpha: 0.22),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
-              )
-            ])
+                      ? AppColors.neonGlow(blur: 22, opacity: 0.35)
+                      : [
+                          BoxShadow(
+                            color: AppColors.neon.withValues(alpha: 0.22),
+                            blurRadius: 18,
+                            offset: const Offset(0, 10),
+                          ),
+                        ])
                 : const [],
           ),
           child: Center(
             child: isLoading
                 ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
-            )
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.black,
+                    ),
+                  )
                 : Text(
-              text,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: Colors.black,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+                    text,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
           ),
         ),
       ),

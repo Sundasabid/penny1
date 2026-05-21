@@ -39,10 +39,7 @@ class PennyTextField extends StatelessWidget {
         prefixIcon: leadingIcon == null ? null : Icon(leadingIcon),
         suffixIcon: trailing == null
             ? null
-            : InkWell(
-          onTap: onTrailingTap,
-          child: trailing,
-        ),
+            : InkWell(onTap: onTrailingTap, child: trailing),
         filled: theme.inputDecorationTheme.filled,
         fillColor: theme.inputDecorationTheme.fillColor,
         contentPadding: theme.inputDecorationTheme.contentPadding,

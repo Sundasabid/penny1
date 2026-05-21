@@ -1,4 +1,3 @@
-
 import '../entities/receipt.dart';
 
 abstract class ReceiptRepository {
@@ -10,4 +9,9 @@ abstract class ReceiptRepository {
 
   // OCR
   Future<String> extractTextFromReceipt(String imageRef);
+
+  Future<void> deleteReceipt(String id);
+
+  // AI-powered Extraction
+  Future<Map<String, dynamic>> extractDetailsWithAI(String imagePath, List<String> availableCategories);
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/themes/app_colors.dart';
 
-
 class PennyIconCircleButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;

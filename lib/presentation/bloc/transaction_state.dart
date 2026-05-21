@@ -7,14 +7,16 @@ class TransactionState extends Equatable {
   final List<TransactionEntity> transactions;
   final String? errorMessage;
 
-  /// Used by AddExpensePage to know when to navigate
+  /// Used by AddExpensePage or History to know when to navigate or refresh
   final bool addSuccess;
+  final bool deleteSuccess;
 
   const TransactionState({
     required this.isLoading,
     required this.transactions,
     required this.errorMessage,
     required this.addSuccess,
+    required this.deleteSuccess,
   });
 
   factory TransactionState.initial() {
@@ -23,6 +25,7 @@ class TransactionState extends Equatable {
       transactions: [],
       errorMessage: null,
       addSuccess: false,
+      deleteSuccess: false,
     );
   }
 
@@ -31,12 +34,14 @@ class TransactionState extends Equatable {
     List<TransactionEntity>? transactions,
     String? errorMessage,
     bool? addSuccess,
+    bool? deleteSuccess,
   }) {
     return TransactionState(
       isLoading: isLoading ?? this.isLoading,
       transactions: transactions ?? this.transactions,
       errorMessage: errorMessage,
       addSuccess: addSuccess ?? false,
+      deleteSuccess: deleteSuccess ?? false,
     );
   }
 
@@ -46,5 +51,6 @@ class TransactionState extends Equatable {
     transactions,
     errorMessage,
     addSuccess,
+    deleteSuccess,
   ];
 }

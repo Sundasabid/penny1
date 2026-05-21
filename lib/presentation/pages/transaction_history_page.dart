@@ -11,7 +11,7 @@ import '../../core/widgets/transaction_item.dart';
 import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
-import 'add_expense.dart';
+// import 'add_expense.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -46,13 +46,17 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
     final q = _searchCtrl.text.trim().toLowerCase();
 
     final filtered = all.where((tx) {
-      final matchSearch = q.isEmpty ||
+      final matchSearch =
+          q.isEmpty ||
           tx.merchant.toLowerCase().contains(q) ||
           tx.category.toLowerCase().contains(q) ||
           tx.paymentMethod.toLowerCase().contains(q);
 
-      final matchRange = _range == null ||
-          (tx.dateTime.isAfter(_range!.start.subtract(const Duration(seconds: 1))) &&
+      final matchRange =
+          _range == null ||
+          (tx.dateTime.isAfter(
+                _range!.start.subtract(const Duration(seconds: 1)),
+              ) &&
               tx.dateTime.isBefore(_range!.end.add(const Duration(days: 1))));
 
       final matchCategory = _category == null || tx.category == _category;
@@ -87,9 +91,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     _CircleIcon(
                       icon: Icons.arrow_back,
                       onTap: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => const AddExpensePage()),
-                        );
+                        Navigator.of(context).pop();
                       },
                     ),
                     const SizedBox(width: 12),
@@ -106,23 +108,28 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                       borderRadius: BorderRadius.circular(14),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Export (coming soon).')),
+                          const SnackBar(
+                            content: Text('Export (coming soon).'),
+                          ),
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEAFBF1),
+                          color: AppColors.neon.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppColors.neon.withValues(alpha: 0.18),
+                            color: AppColors.neon.withOpacity(0.2),
                           ),
                         ),
                         child: Text(
                           'Export',
                           style: theme.textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.w900,
-                            color: AppColors.neonDark,
+                            color: AppColors.neon,
                           ),
                         ),
                       ),
@@ -154,9 +161,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                       builder: (context, child) {
                         return Theme(
                           data: Theme.of(context).copyWith(
-                            colorScheme: Theme.of(context)
-                                .colorScheme
-                                .copyWith(primary: AppColors.neon),
+                            colorScheme: Theme.of(
+                              context,
+                            ).colorScheme.copyWith(primary: AppColors.neon),
                           ),
                           child: child!,
                         );
@@ -220,7 +227,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
                       state.errorMessage!,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.red,
+                      ),
                     ),
                   ),
 
@@ -236,7 +245,39 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                   ),
 
                 for (final tx in filtered) ...[
-                  TransactionItem(tx: tx),
+                  TransactionItem(
+                    tx: tx,
+                    onDelete: () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Delete Transaction'),
+                          content: const Text(
+                            'Are you sure you want to delete this transaction? This will also update your budget and spending totals.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirmed == true && mounted) {
+                        context.read<TransactionBloc>().add(
+                          DeleteTransactionRequested(tx),
+                        );
+                      }
+                    },
+                  ),
                   const SizedBox(height: 12),
                 ],
               ],

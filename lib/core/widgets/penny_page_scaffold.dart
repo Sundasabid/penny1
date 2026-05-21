@@ -33,7 +33,8 @@ class PennyPageScaffold extends StatelessWidget {
                   if (showBack)
                     PennyIconCircleButton(
                       icon: Icons.arrow_back,
-                      onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+                      onPressed:
+                          onBack ?? () => Navigator.of(context).maybePop(),
                     )
                   else
                     const SizedBox(width: 44),
@@ -41,7 +42,9 @@ class PennyPageScaffold extends StatelessWidget {
                   Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const Spacer(),
                   SizedBox(
@@ -50,7 +53,10 @@ class PennyPageScaffold extends StatelessWidget {
                       alignment: Alignment.centerRight,
                       child: (actions == null || actions!.isEmpty)
                           ? const SizedBox.shrink()
-                          : Row(mainAxisSize: MainAxisSize.min, children: actions!),
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: actions!,
+                            ),
                     ),
                   ),
                 ],

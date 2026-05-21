@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/themes/app_colors.dart';
 
-
 class PennyCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -33,7 +32,9 @@ class PennyCard extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: border, width: 1),
-        boxShadow: glow && isDark ? AppColors.neonGlow(blur: 18, opacity: 0.20) : const [],
+        boxShadow: glow && isDark
+            ? AppColors.neonGlow(blur: 18, opacity: 0.20)
+            : const [],
       ),
       padding: padding,
       child: child,

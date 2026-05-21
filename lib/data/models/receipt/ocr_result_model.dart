@@ -25,10 +25,14 @@ class OcrResultModel {
     return OcrResultModel(
       extractedText: (json['extractedText'] ?? '') as String,
       merchantName: (json['merchantName'] ?? 'Unknown Merchant') as String,
-      totalAmount: (json['totalAmount'] is num) ? (json['totalAmount'] as num).toDouble() : 0.0,
+      totalAmount: (json['totalAmount'] is num)
+          ? (json['totalAmount'] as num).toDouble()
+          : 0.0,
       category: (json['category'] ?? 'other') as String,
       currency: (json['currency'] ?? 'PKR') as String,
-      date: json['date'] != null ? DateTime.tryParse(json['date'] as String) : null,
+      date: json['date'] != null
+          ? DateTime.tryParse(json['date'] as String)
+          : null,
     );
   }
 

@@ -3,7 +3,8 @@
 class ReceiptParseResult {
   final String merchantName;
   final double totalAmount;
-  final String category; // grocery, transport, dining, shopping, bills, health, etc.
+  final String
+  category; // grocery, transport, dining, shopping, bills, health, etc.
   final DateTime? date;
   final String currency;
 
@@ -70,7 +71,8 @@ class ReceiptParser {
         lower.contains('rs ') ||
         lower.contains('rs.') ||
         lower.contains('rupee') ||
-        lower.contains('rupees')) return 'PKR';
+        lower.contains('rupees'))
+      return 'PKR';
     if (lower.contains('usd') || lower.contains('\$')) return 'USD';
     if (lower.contains('aed')) return 'AED';
     if (lower.contains('sar')) return 'SAR';
@@ -83,18 +85,39 @@ class ReceiptParser {
   DateTime? _extractDate(List<String> lines) {
     final joined = lines.take(25).join(' ');
 
-    final iso = RegExp(r'\b(20\d{2})[-\/\.](0?[1-9]|1[0-2])[-\/\.](0?[1-9]|[12]\d|3[01])\b');
-    final dmy = RegExp(r'\b(0?[1-9]|[12]\d|3[01])[-\/\.](0?[1-9]|1[0-2])[-\/\.](20\d{2})\b');
-    final mdy = RegExp(r'\b(0?[1-9]|1[0-2])[-\/\.](0?[1-9]|[12]\d|3[01])[-\/\.](20\d{2})\b');
+    final iso = RegExp(
+      r'\b(20\d{2})[-\/\.](0?[1-9]|1[0-2])[-\/\.](0?[1-9]|[12]\d|3[01])\b',
+    );
+    final dmy = RegExp(
+      r'\b(0?[1-9]|[12]\d|3[01])[-\/\.](0?[1-9]|1[0-2])[-\/\.](20\d{2})\b',
+    );
+    final mdy = RegExp(
+      r'\b(0?[1-9]|1[0-2])[-\/\.](0?[1-9]|[12]\d|3[01])[-\/\.](20\d{2})\b',
+    );
 
     Match? m = iso.firstMatch(joined);
-    if (m != null) return _safeDate(int.parse(m.group(1)!), int.parse(m.group(2)!), int.parse(m.group(3)!));
+    if (m != null)
+      return _safeDate(
+        int.parse(m.group(1)!),
+        int.parse(m.group(2)!),
+        int.parse(m.group(3)!),
+      );
 
     m = dmy.firstMatch(joined);
-    if (m != null) return _safeDate(int.parse(m.group(3)!), int.parse(m.group(2)!), int.parse(m.group(1)!));
+    if (m != null)
+      return _safeDate(
+        int.parse(m.group(3)!),
+        int.parse(m.group(2)!),
+        int.parse(m.group(1)!),
+      );
 
     m = mdy.firstMatch(joined);
-    if (m != null) return _safeDate(int.parse(m.group(3)!), int.parse(m.group(1)!), int.parse(m.group(2)!));
+    if (m != null)
+      return _safeDate(
+        int.parse(m.group(3)!),
+        int.parse(m.group(1)!),
+        int.parse(m.group(2)!),
+      );
 
     return null;
   }
@@ -141,7 +164,8 @@ class ReceiptParser {
 
       // Penalize generic words
       final lower = cleaned.toLowerCase();
-      if (lower == 'store' || lower == 'mart' || lower == 'supermarket') score -= 10;
+      if (lower == 'store' || lower == 'mart' || lower == 'supermarket')
+        score -= 10;
 
       // Penalize if it contains total keywords
       if (lower.contains('total') ||
@@ -256,10 +280,15 @@ class ReceiptParser {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
-    return s.replaceAll(
-      RegExp(r'^(merchant|store|store name|shop|name)\s*[:\-]\s*', caseSensitive: false),
-      '',
-    ).trim();
+    return s
+        .replaceAll(
+          RegExp(
+            r'^(merchant|store|store name|shop|name)\s*[:\-]\s*',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .trim();
   }
 
   bool _isNameLike(String s) {
@@ -342,7 +371,8 @@ class ReceiptParser {
     for (final m in matches) {
       final whole = m.group(1) ?? '';
       final frac = m.group(2);
-      final normalized = whole.replaceAll(',', '') + (frac != null ? '.$frac' : '');
+      final normalized =
+          whole.replaceAll(',', '') + (frac != null ? '.$frac' : '');
       final val = double.tryParse(normalized);
       if (val != null && val > 0) out.add(val);
     }
@@ -369,39 +399,122 @@ class ReceiptParser {
 
     // grocery / supermarket
     final grocery = <String>[
-      'mart', 'super', 'supermarket', 'grocery', 'cash & carry', 'cash and carry',
-      'metro', 'carrefour', 'imti', 'imtiaz', 'alfatah', 'al fatah', 'utility store',
-      'fresh', 'bakery', 'fruit', 'vegetable', 'butcher', 'meat',
-      'milk', 'eggs', 'bread', 'rice', 'flour', 'atta', 'dal', 'lentil',
+      'mart',
+      'super',
+      'supermarket',
+      'grocery',
+      'cash & carry',
+      'cash and carry',
+      'metro',
+      'carrefour',
+      'imti',
+      'imtiaz',
+      'alfatah',
+      'al fatah',
+      'utility store',
+      'fresh',
+      'bakery',
+      'fruit',
+      'vegetable',
+      'butcher',
+      'meat',
+      'milk',
+      'eggs',
+      'bread',
+      'rice',
+      'flour',
+      'atta',
+      'dal',
+      'lentil',
     ];
 
     // dining
     final dining = <String>[
-      'restaurant', 'cafe', 'coffee', 'pizza', 'burger', 'biryani', 'shawarma',
-      'food', 'bbq', 'tea', 'shake', 'juice',
-      'kfc', 'mcdonald', 'mcdonalds', 'hardees', 'subway', 'cheezious',
-      'dominos', 'broadway', 'krados', 'optp',
+      'restaurant',
+      'cafe',
+      'coffee',
+      'pizza',
+      'burger',
+      'biryani',
+      'shawarma',
+      'food',
+      'bbq',
+      'tea',
+      'shake',
+      'juice',
+      'kfc',
+      'mcdonald',
+      'mcdonalds',
+      'hardees',
+      'subway',
+      'cheezious',
+      'dominos',
+      'broadway',
+      'krados',
+      'optp',
     ];
 
     // shopping
     final shopping = <String>[
-      'store', 'mall', 'outlet', 'shop', 'clothing', 'apparel', 'shoe', 'brand',
-      'garments', 'boutique', 'fashion', 'cosmetics', 'makeup',
-      'electronics', 'mobile', 'accessories',
+      'store',
+      'mall',
+      'outlet',
+      'shop',
+      'clothing',
+      'apparel',
+      'shoe',
+      'brand',
+      'garments',
+      'boutique',
+      'fashion',
+      'cosmetics',
+      'makeup',
+      'electronics',
+      'mobile',
+      'accessories',
     ];
 
     // bills/utilities
     final bills = <String>[
-      'electric', 'electricity', 'lesco', 'iesco', 'fesco', 'gepco', 'kepco',
-      'k-electric', 'kelectric', 'gas', 'ssgc', 'sngpl', 'water',
-      'internet', 'ptcl', 'stormfiber', 'nayatel',
-      'jazz', 'telenor', 'ufone', 'zong', 'bill', 'recharge', 'topup',
+      'electric',
+      'electricity',
+      'lesco',
+      'iesco',
+      'fesco',
+      'gepco',
+      'kepco',
+      'k-electric',
+      'kelectric',
+      'gas',
+      'ssgc',
+      'sngpl',
+      'water',
+      'internet',
+      'ptcl',
+      'stormfiber',
+      'nayatel',
+      'jazz',
+      'telenor',
+      'ufone',
+      'zong',
+      'bill',
+      'recharge',
+      'topup',
     ];
 
     // health
     final health = <String>[
-      'pharmacy', 'medical', 'clinic', 'hospital', 'lab', 'diagnostic',
-      'dawa', 'medicine', 'tablet', 'capsule', 'syrup',
+      'pharmacy',
+      'medical',
+      'clinic',
+      'hospital',
+      'lab',
+      'diagnostic',
+      'dawa',
+      'medicine',
+      'tablet',
+      'capsule',
+      'syrup',
     ];
 
     int score(List<String> keys) {
@@ -431,12 +544,27 @@ class ReceiptParser {
 
     final best = scores.entries.reduce((a, b) => a.value >= b.value ? a : b);
 
-    if (best.value >= 2) return best.key; // needs at least 2 hits to avoid random matches
+    if (best.value >= 2)
+      return best.key; // needs at least 2 hits to avoid random matches
     if (best.value == 1) {
       // single hit can still be useful if it is a strong keyword
       final strong = <String>{
-        'pso', 'hascol', 'caltex', 'euro oil', 'kelectric', 'k-electric', 'sngpl', 'ssgc',
-        'kfc', 'mcdonald', 'mcdonalds', 'cheezious', 'metro', 'carrefour', 'alfatah', 'al fatah',
+        'pso',
+        'hascol',
+        'caltex',
+        'euro oil',
+        'kelectric',
+        'k-electric',
+        'sngpl',
+        'ssgc',
+        'kfc',
+        'mcdonald',
+        'mcdonalds',
+        'cheezious',
+        'metro',
+        'carrefour',
+        'alfatah',
+        'al fatah',
       };
       if (strong.any((k) => text.contains(k))) return best.key;
     }

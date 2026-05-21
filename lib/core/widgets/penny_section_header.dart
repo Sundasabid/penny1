@@ -20,7 +20,9 @@ class PennySectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+          ),
         ),
         const Spacer(),
         if (actionText != null)
@@ -28,9 +30,11 @@ class PennySectionHeader extends StatelessWidget {
             onTap: onAction,
             child: Text(
               actionText!,
-              style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          )
+          ),
       ],
     );
   }

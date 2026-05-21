@@ -10,7 +10,9 @@ import '../../domain/entities/transaction.dart';
 import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
-
+import '../bloc/category/category_bloc.dart';
+import '../bloc/category/category_state.dart';
+import '../../domain/entities/category.dart';
 
 class AddExpensePage extends StatefulWidget {
   const AddExpensePage({super.key});
@@ -20,7 +22,6 @@ class AddExpensePage extends StatefulWidget {
 }
 
 class _AddExpensePageState extends State<AddExpensePage> {
-  // No placeholders. No defaults.
   final TextEditingController _merchantCtrl = TextEditingController();
   final TextEditingController _notesCtrl = TextEditingController();
 
@@ -29,14 +30,17 @@ class _AddExpensePageState extends State<AddExpensePage> {
   String _selectedCategory = 'Groceries';
   String _paymentMethod = 'Card';
 
-  final List<String> _categories = const [
-    'Groceries',
-    'Dining',
-    'Transport',
-    'Shopping',
-    'Utilities',
-    'Others',
-  ];
+  bool _categoriesContains(String name, List<CategoryEntity> list) {
+    return list.any((element) => element.name == name);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with a default if possible, or wait for stream
+    // _selectedCategory is initialized to 'Groceries'.
+    // We should probably clear it or ensure it matches dynamic list.
+  }
 
   @override
   void dispose() {
@@ -48,15 +52,15 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void _saveExpense() {
     final merchant = _merchantCtrl.text.trim();
     if (_amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid amount.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Enter a valid amount.')));
       return;
     }
     if (merchant.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter merchant/title.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Enter merchant/title.')));
       return;
     }
 
@@ -69,7 +73,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
       paymentMethod: _paymentMethod,
       isIncome: false,
       source: TransactionSource.manual,
-      receiptId: null
+      receiptId: null,
     );
 
     context.read<TransactionBloc>().add(AddTransactionRequested(tx));
@@ -101,28 +105,40 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   String _dateLabel(DateTime d) {
     const months = [
-      'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final now = DateTime.now();
-    final isToday = d.year == now.year && d.month == now.month && d.day == now.day;
+    final isToday =
+        d.year == now.year && d.month == now.month && d.day == now.day;
     if (isToday) return 'Today, ${d.day} ${months[d.month - 1]}';
     return '${d.day} ${months[d.month - 1]} ${d.year}';
   }
 
   String _formatAmount(double v) {
     final n = v.round().toString();
-    // simple thousands formatting without intl
     final chars = n.split('').reversed.toList();
     final out = <String>[];
     for (int i = 0; i < chars.length; i++) {
+      if (i != 0 && i % 3 == 0) out.add(',');
       out.add(chars[i]);
-      if ((i + 1) % 3 == 0 && i != chars.length - 1) out.add(',');
     }
     return out.reversed.join();
   }
 
   Future<void> _openAmountSheet() async {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final controller = TextEditingController(
       text: _amount <= 0 ? '' : _amount.round().toString(),
     );
@@ -145,12 +161,13 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: theme.dividerColor.withValues(alpha: 0.55),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
               const SizedBox(height: 14),
-
               Row(
                 children: [
                   Text(
@@ -166,31 +183,26 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       'Cancel',
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                        color: isDark
+                            ? AppColors.textOnDarkMuted
+                            : AppColors.textOnLightMuted,
                       ),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
-
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
+                  color: isDark
+                      ? const Color(0xFF131A21)
+                      : theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.neon.withValues(alpha: 0.25),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.neon.withValues(alpha: 0.10),
-                      blurRadius: 18,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+                  border: Border.all(color: AppColors.neon.withOpacity(0.25)),
                 ),
                 child: Row(
                   children: [
@@ -198,7 +210,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       'PKR',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w900,
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.55),
+                        color: isDark
+                            ? AppColors.textOnDarkMuted
+                            : AppColors.textOnLightMuted,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -207,26 +221,27 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         controller: controller,
                         autofocus: true,
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: AppColors.neonDark,
+                          color: AppColors.neon,
                         ),
                         decoration: const InputDecoration(
                           isDense: true,
                           border: InputBorder.none,
+                          filled: false,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 14),
-
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 56,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neon,
@@ -234,7 +249,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    elevation: 0,
                   ),
                   onPressed: () {
                     final raw = controller.text.trim();
@@ -265,43 +279,46 @@ class _AddExpensePageState extends State<AddExpensePage> {
   }
 
   InputDecoration _fieldDecoration(ThemeData theme, {required IconData icon}) {
+    final isDark = theme.brightness == Brightness.dark;
     return InputDecoration(
       filled: true,
-      fillColor: theme.colorScheme.surface,
+      fillColor: isDark ? const Color(0xFF131A21) : theme.colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       prefixIcon: Container(
         margin: const EdgeInsets.only(left: 12, right: 10),
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: AppColors.neon.withValues(alpha: 0.10),
+          color: AppColors.neon.withOpacity(0.1),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, color: AppColors.neonDark, size: 20),
+        child: Icon(icon, color: AppColors.neon, size: 20),
       ),
       prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: theme.dividerColor.withValues(alpha: 0.7)),
-      ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: theme.dividerColor.withValues(alpha: 0.7)),
+        borderSide: BorderSide(
+          color: isDark ? const Color(0xFF1E272E) : const Color(0xFFE2E8F0),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.neon.withValues(alpha: 0.75), width: 1.4),
+        borderSide: BorderSide(
+          color: AppColors.neon.withOpacity(0.5),
+          width: 1.5,
+        ),
       ),
     );
   }
 
   Widget _label(String t) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Text(
       t,
       style: theme.textTheme.bodyMedium?.copyWith(
         fontWeight: FontWeight.w700,
-        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.55),
+        color: isDark ? AppColors.textOnDarkMuted : AppColors.textOnLightMuted,
       ),
     );
   }
@@ -309,6 +326,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return BlocListener<TransactionBloc, TransactionState>(
       listenWhen: (p, c) => p.addSuccess != c.addSuccess,
@@ -325,7 +343,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
             children: [
-              // Top row: X, centered title
               Row(
                 children: [
                   InkWell(
@@ -336,16 +353,15 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       height: 44,
                       alignment: Alignment.center,
                       child: Icon(
-                        Icons.close,
-                        color: theme.textTheme.bodyLarge?.color,
+                        Icons.close_rounded,
+                        color: isDark ? Colors.white : const Color(0xFF101828),
                         size: 26,
                       ),
                     ),
                   ),
                   const Spacer(),
                   Text(
-                    'New\nExpense',
-                    textAlign: TextAlign.center,
+                    'New Expense',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
@@ -354,40 +370,32 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   const SizedBox(width: 44),
                 ],
               ),
-
-              const SizedBox(height: 18),
-
-              // Amount card (tap to edit)
+              const SizedBox(height: 24),
               InkWell(
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(24),
                 onTap: _openAmountSheet,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 26),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 30,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.neon.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(22),
+                    color: AppColors.neon.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppColors.neon.withOpacity(0.1)),
                   ),
                   child: Column(
                     children: [
-                      // Keep your existing layout text if you still want.
-                      // If you truly want "digits only", delete the two Text widgets below.
-                      Text(
-                        'Enter',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.45),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
                       Text(
                         'Amount',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.45),
+                          color: isDark
+                              ? AppColors.textOnDarkMuted
+                              : AppColors.textOnLightMuted,
                         ),
                       ),
-                      const SizedBox(height: 10),
-
+                      const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -395,15 +403,17 @@ class _AddExpensePageState extends State<AddExpensePage> {
                             'PKR',
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w900,
-                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.45),
+                              color: isDark
+                                  ? AppColors.textOnDarkMuted
+                                  : AppColors.textOnLightMuted,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Text(
                             _formatAmount(_amount),
                             style: theme.textTheme.displaySmall?.copyWith(
                               fontWeight: FontWeight.w900,
-                              color: AppColors.neonDark,
+                              color: AppColors.neon,
                             ),
                           ),
                         ],
@@ -412,61 +422,84 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 22),
-
+              const SizedBox(height: 24),
               _label('Merchant / Title'),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               TextField(
                 controller: _merchantCtrl,
-                decoration: _fieldDecoration(theme, icon: Icons.store),
+                decoration: _fieldDecoration(theme, icon: Icons.store_rounded),
               ),
-
-              const SizedBox(height: 18),
-
+              const SizedBox(height: 20),
               _label('Category'),
-              const SizedBox(height: 8),
-              InputDecorator(
-                decoration: _fieldDecoration(theme, icon: Icons.shopping_cart_outlined).copyWith(
-                  // Greenish focused outline already handled; add slight glow
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppColors.neon.withValues(alpha: 0.85), width: 1.4),
-                  ),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedCategory,
-                    isExpanded: true,
-                    icon: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.55),
+              const SizedBox(height: 10),
+              BlocBuilder<CategoryBloc, CategoryState>(
+                builder: (context, state) {
+                  var categories = state.categories;
+                  if (categories.isEmpty) {
+                    // Fallback or loading state if truly empty (should have defaults)
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // Ensure selected category exists in list, else default to first
+                  if (!categories.any((c) => c.name == _selectedCategory)) {
+                    if (categories.isNotEmpty) {
+                      // _selectedCategory = categories.first.name;
+                      // Can't set state in build, just rely on user picking or logic matching
+                      // Ideally initialize _selectedCategory with first category in initState or BlocListener
+                    }
+                  }
+
+                  return InputDecorator(
+                    decoration: _fieldDecoration(
+                      theme,
+                      icon: Icons.shopping_cart_rounded,
                     ),
-                    onChanged: (v) => setState(() => _selectedCategory = v ?? _selectedCategory),
-                    items: _categories
-                        .map((c) => DropdownMenuItem(
-                      value: c,
-                      child: Text(
-                        c,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value:
+                            _categoriesContains(_selectedCategory, categories)
+                            ? _selectedCategory
+                            : null,
+                        hint: Text("Select Category"),
+                        isExpanded: true,
+                        icon: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: isDark
+                              ? AppColors.textOnDarkMuted
+                              : AppColors.textOnLightMuted,
                         ),
+                        onChanged: (v) => setState(
+                          () => _selectedCategory = v ?? _selectedCategory,
+                        ),
+                        items: categories
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.name,
+                                child: Text(
+                                  c.name,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
-                    ))
-                        .toList(),
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
-
-              const SizedBox(height: 18),
-
+              const SizedBox(height: 20),
               _label('Date'),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: _pickDate,
                 child: InputDecorator(
-                  decoration: _fieldDecoration(theme, icon: Icons.calendar_today_outlined),
+                  decoration: _fieldDecoration(
+                    theme,
+                    icon: Icons.calendar_today_rounded,
+                  ),
                   child: Text(
                     _dateLabel(_selectedDate),
                     style: theme.textTheme.bodyLarge?.copyWith(
@@ -475,28 +508,25 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 18),
-
+              const SizedBox(height: 20),
               _label('Payment Method'),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               _PaymentTabs(
                 value: _paymentMethod,
                 onChanged: (v) => setState(() => _paymentMethod = v),
               ),
-
-              const SizedBox(height: 18),
-
+              const SizedBox(height: 20),
               _label('Notes (Optional)'),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               TextField(
                 controller: _notesCtrl,
                 maxLines: 3,
-                decoration: _fieldDecoration(theme, icon: Icons.note_alt_outlined),
+                decoration: _fieldDecoration(
+                  theme,
+                  icon: Icons.note_alt_rounded,
+                ),
               ),
-
-              const SizedBox(height: 26),
-
+              const SizedBox(height: 32),
               BlocBuilder<TransactionBloc, TransactionState>(
                 builder: (context, state) {
                   return Container(
@@ -504,8 +534,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.neon.withValues(alpha: 0.20),
-                          blurRadius: 22,
+                          color: AppColors.neon.withOpacity(0.2),
+                          blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
                       ],
@@ -521,26 +551,24 @@ class _AddExpensePageState extends State<AddExpensePage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
-                          elevation: 0,
                         ),
                         child: state.isLoading
-                            ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
                             : const Text(
-                          'Save Expense',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18,
-                          ),
-                        ),
+                                'Save Expense',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18,
+                                ),
+                              ),
                       ),
                     ),
                   );
                 },
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -553,45 +581,46 @@ class _PaymentTabs extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
-  const _PaymentTabs({
-    required this.value,
-    required this.onChanged,
-  });
+  const _PaymentTabs({required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     const options = ['Cash', 'Card', 'Online'];
 
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.7)),
+        color: isDark ? const Color(0xFF131A21) : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E272E) : const Color(0xFFE2E8F0),
+        ),
       ),
       child: Row(
         children: options.map((opt) {
           final selected = opt == value;
-
           return Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: () => onChanged(opt),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
+                duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: selected ? Colors.white : Colors.transparent,
+                  color: selected
+                      ? (isDark ? const Color(0xFF1C252E) : Colors.white)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
-                  boxShadow: selected
+                  boxShadow: selected && !isDark
                       ? [
-                    BoxShadow(
-                      color: AppColors.neon.withValues(alpha: 0.14),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
                       : null,
                 ),
                 child: Center(
@@ -600,8 +629,12 @@ class _PaymentTabs extends StatelessWidget {
                     style: theme.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: selected
-                          ? theme.textTheme.bodyLarge?.color
-                          : theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.45),
+                          ? (isDark
+                                ? AppColors.neon
+                                : theme.textTheme.bodyLarge?.color)
+                          : (isDark
+                                ? AppColors.textOnDarkMuted
+                                : AppColors.textOnLightMuted),
                     ),
                   ),
                 ),

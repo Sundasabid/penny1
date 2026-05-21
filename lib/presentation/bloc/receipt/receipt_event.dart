@@ -19,3 +19,8 @@ class SaveReceiptRequested extends ReceiptEvent {
     required this.dateTime,
   });
 }
+
+class DeleteReceiptRequested extends ReceiptEvent {
+  final dynamic receipt; // Using dynamic to avoid ReceiptEntity import if not needed here, but usually it is. Actually, ReceiptEntity is better.
+  DeleteReceiptRequested(this.receipt);
+}

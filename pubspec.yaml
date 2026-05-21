@@ -26,6 +26,19 @@ dependencies:
 
   # Icons
   cupertino_icons: ^1.0.8
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+  cloud_firestore: ^6.1.2
+  google_generative_ai: any
+  flutter_markdown: ^0.7.7+1
+  fl_chart: ^0.70.2
+  shimmer: ^3.0.0
+  flutter_contacts: ^1.1.9+2
+  permission_handler: ^11.3.1
+  url_launcher: ^6.3.0
+  flutter_local_notifications: ^21.0.0
+  timezone: ^0.11.0
+  telephony: ^0.2.0
 
 dev_dependencies:
   flutter_test:
@@ -38,3 +51,5 @@ flutter:
 
   assets:
     - assets/images/google_logo.png
+    - assets/images/onboarding_sms.png
+    - assets/images/onboarding_ai_v2.png

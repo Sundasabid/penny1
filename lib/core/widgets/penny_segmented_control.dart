@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/themes/app_colors.dart';
 
-
 class PennySegmentedControl extends StatelessWidget {
   final List<String> items;
   final String value;
@@ -20,7 +19,9 @@ class PennySegmentedControl extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final bg = isDark ? AppColors.darkSurface2 : theme.colorScheme.surfaceContainerHighest;
+    final bg = isDark
+        ? AppColors.darkSurface2
+        : theme.colorScheme.surfaceContainerHighest;
     final border = isDark ? AppColors.darkBorder : AppColors.lightBorder;
 
     Widget chip(String label) {
@@ -34,13 +35,19 @@ class PennySegmentedControl extends StatelessWidget {
             duration: const Duration(milliseconds: 140),
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: selected ? (isDark ? AppColors.darkCard : Colors.white) : Colors.transparent,
+              color: selected
+                  ? (isDark ? AppColors.darkCard : Colors.white)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: selected ? AppColors.neon.withValues(alpha: 0.65) : Colors.transparent,
+                color: selected
+                    ? AppColors.neon.withValues(alpha: 0.65)
+                    : Colors.transparent,
                 width: 1,
               ),
-              boxShadow: selected && isDark ? AppColors.neonGlow(blur: 16, opacity: 0.18) : const [],
+              boxShadow: selected && isDark
+                  ? AppColors.neonGlow(blur: 16, opacity: 0.18)
+                  : const [],
             ),
             child: Center(
               child: Text(

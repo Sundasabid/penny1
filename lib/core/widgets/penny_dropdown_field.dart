@@ -14,7 +14,11 @@ class PennyDropdownField extends StatelessWidget {
     this.leadingIcon,
   });
 
-  InputDecoration _decorationFromTheme(BuildContext context, {Widget? prefixIcon, Widget? suffixIcon}) {
+  InputDecoration _decorationFromTheme(
+    BuildContext context, {
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+  }) {
     final t = Theme.of(context).inputDecorationTheme;
     return InputDecoration(
       prefixIcon: prefixIcon,
@@ -48,10 +52,10 @@ class PennyDropdownField extends StatelessWidget {
           items: items
               .map(
                 (e) => DropdownMenuItem<String>(
-              value: e,
-              child: Text(e, style: theme.textTheme.bodyMedium),
-            ),
-          )
+                  value: e,
+                  child: Text(e, style: theme.textTheme.bodyMedium),
+                ),
+              )
               .toList(),
           onChanged: (v) {
             if (v != null) onChanged(v);
