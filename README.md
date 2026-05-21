@@ -76,6 +76,3 @@ dependencies:
 - Bank SMS patterns tuned for Pakistani banks (Rs., PKR, debited, spent)
 - Localized financial challenges and saving tips
 
----
-
-## 📁 Project Structure
