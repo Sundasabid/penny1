@@ -1,25 +1,25 @@
-# 💰 Penny — Personal Finance Manager
+# Penny — Personal Finance Manager
 
 A smart, AI-powered personal finance app built for Pakistan. Penny helps you track spending, scan receipts, auto-read bank SMS alerts, set budgets, and plan savings — all in one place.
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔐 **Firebase Auth** — Secure login, registration & password reset
-- 📲 **Bank SMS Auto-Sync** — Automatically reads & parses bank alert messages
-- 🧾 **Receipt Scanner** — Scan receipts via camera; Gemini AI extracts amount, merchant & category
-- ✍️ **Manual Transaction Logs** — Quick expense & income entry with category selection
-- 📊 **Category Budgets** — Set monthly limits with real-time gauges & push notifications
-- 🤖 **AI Co-Pilot** — Financial Health Score, spending forecast, purchase planner & subscription radar
-- 🫙 **Saving Vaults** — Goal-based saving jars with liquid fill animations
-- 🗓️ **Spending Heatmap** — Visual calendar of daily spending intensity
-- 💎 **Onyx Gamification** — Earn reward points for healthy financial habits
-- 💬 **AI Chat with Function Calling** — Manage finances via natural language commands
+- **Firebase Auth** — Secure login, registration & password reset
+-  **Bank SMS Auto-Sync** — Automatically reads & parses bank alert messages
+-  **Receipt Scanner** — Scan receipts via camera; Gemini AI extracts amount, merchant & category
+-  **Manual Transaction Logs** — Quick expense & income entry with category selection
+- **Category Budgets** — Set monthly limits with real-time gauges & push notifications
+-  **AI Co-Pilot** — Financial Health Score, spending forecast, purchase planner & subscription radar
+-  **Saving Vaults** — Goal-based saving jars with liquid fill animations
+-  **Spending Heatmap** — Visual calendar of daily spending intensity
+- **Onyx Gamification** — Earn reward points for healthy financial habits
+- **AI Chat with Function Calling** — Manage finances via natural language commands
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -32,7 +32,7 @@ A smart, AI-powered personal finance app built for Pakistan. Penny helps you tra
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 Penny follows **Clean Architecture** with three layers:
 
@@ -42,7 +42,7 @@ Penny follows **Clean Architecture** with three layers:
 
 ---
 
-## 🤖 AI Capabilities
+## AI Capabilities
 
 - **Receipt OCR** — Gemini Vision parses merchant, amount, date & category from receipt images
 - **SMS Parsing** — Gemini extracts transaction data from raw bank SMS text
@@ -52,7 +52,7 @@ Penny follows **Clean Architecture** with three layers:
 
 ---
 
-## 📦 Key Packages
+## Key Packages
 
 ```yaml
 dependencies:
@@ -69,10 +69,4 @@ dependencies:
 ```
 
 ---
-
-## 🇵🇰 Built for Pakistan
-
-- PKR currency formatting throughout
-- Bank SMS patterns tuned for Pakistani banks (Rs., PKR, debited, spent)
-- Localized financial challenges and saving tips
 
